@@ -1,8 +1,9 @@
 import { useState } from "react"
+import confetti from 'canvas-confetti'
 
 const TURNS = {
-  X: 'x',
-  O: 'o',
+  X: '❌',
+  O: '⚪'
 }
 
 const Square = ({ children, isSelected, updateBoard, index }) => {
@@ -58,6 +59,16 @@ function App() {
     return null
   }
 
+  const resetGame = () => {
+    setBoard(Array(9).fill(null))
+    setTurn(TURNS.X)
+    setWinner(null)
+  }
+
+  const checkEndGame = (newBoard) => {
+    return newBoard.every((square) => square !== null)
+  }
+
   const updateBoard = (index) => {
     // No se puede cambiar la casilla si ya tiene un valor
     if (board[index] || winner) return
@@ -75,6 +86,10 @@ function App() {
     const newWinner = checkWinner(newBoard)
     if (newWinner) {
       setWinner(newWinner)
+      confetti()
+    }  // revisar si hay empate
+    else if (checkEndGame(newBoard)) {
+      setWinner(false)
     }
   }
 
@@ -83,16 +98,18 @@ function App() {
 
       <h1>Tic Tac Toe</h1>
 
+      <button onClick={resetGame}>Empezar de nuevo</button>
+
       <section className="game">
         {
-          board.map((_, index) => {
+          board.map((square, index) => {
             return (
               <Square
                 key={index}
                 index={index}
                 updateBoard={updateBoard}
               >
-                {board[index]}
+                {square}
               </Square>  
             )
           })
@@ -110,6 +127,34 @@ function App() {
         </Square>
 
       </section>
+
+      {
+        winner !== null && (
+          <section className="winner">
+            <div className="text">
+              <h2>
+                {
+                  winner === false
+                    ? 'Esta partida fue empate'
+                    : 'El ganador es: '
+                }
+              </h2>
+
+              <header className="win">
+                {
+                  winner && <Square>{winner}</Square>
+                }
+              </header>
+
+              <footer>
+                <button onClick={resetGame}>Empezar de nuevo</button>
+              </footer>
+
+            </div>
+          </section>
+        )
+      }
+
     </main>
   )
 }
